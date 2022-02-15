@@ -8,7 +8,6 @@ from json2tellraw import json2tellraw
 # 入力ファイルがあるフォルダ フォルダ内のファイルをすべて処理する
 IN_PATH = 'input'
 
-
 if __name__ == '__main__':
     for path in glob.glob(IN_PATH + '/*.json'):
         file_name = path.split('\\')[-1]
@@ -17,7 +16,7 @@ if __name__ == '__main__':
         summon = json2summon(path)
         print(summon)
 
-        tellraw = json2tellraw(file_name)
+        tellraw = json2tellraw(path)
         print(tellraw)
 
         book = json2book(path)

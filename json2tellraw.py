@@ -24,9 +24,9 @@ S_LIM = 25
 
 # この下は触らない
 def json2tellraw(file_path):
-    global F_SELECTOR, T_SELECTOR, T_NAME, S_LIM, IN_PATH
+    global F_SELECTOR, T_SELECTOR, T_NAME, S_LIM
 
-    with open(IN_PATH +'/'+file_path, mode='r', encoding="utf-8") as in_f:
+    with open(file_path, mode='r', encoding="utf-8") as in_f:
         d = json.load(in_f)
 
         execute = ' '.join(['execute at', F_SELECTOR.replace("NAME", d["name"])])
@@ -57,6 +57,5 @@ if __name__ == "__main__":
     IN_PATH = 'input'
 
     for f in glob.glob(IN_PATH + '/*.json'):
-        ff = f.split('\\')[-1]
-        print(ff)
-        print(json2tellraw(ff))
+        print(f)
+        print(json2tellraw(f))
