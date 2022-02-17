@@ -67,7 +67,7 @@ def json2book(in_file_name):
         return results
         
 if __name__ == '__main__':
-    IN_PATH = 'input'
+    IN_PATH = 'input/json'
     for f in glob.glob(IN_PATH + '/*.json'):
         print(f)
         print(json2book(f))

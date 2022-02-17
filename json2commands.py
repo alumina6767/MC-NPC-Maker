@@ -6,7 +6,7 @@ from json2summon import json2summon
 from json2tellraw import json2tellraw
 
 # 入力ファイルがあるフォルダ フォルダ内のファイルをすべて処理する
-IN_PATH = 'input'
+IN_PATH = 'input/json'
 
 if __name__ == '__main__':
     for path in glob.glob(IN_PATH + '/*.json'):
