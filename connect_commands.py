@@ -23,33 +23,45 @@ def add_backslash(s):
     for i in range(bs_count-1, 0, -1):
         s = re.sub(rf"(?<=[^\\])\\{{{i}}}(?=[^\\])", r'\\'*bs_add[i], s)
 
+    if '\"' not in s and '\'' not in s:
+        s = '\\\"' + s + '\\\"'
+    else:
+        s = '\\\'' + s + '\\\''
+
     return s
 
-
-def connect_commands(merges):
+def connect_commands(commands):
     """ 
     リストで与えられたコマンドを連結する
     連結する際にシングルクォーテーションで囲むので、そのへんの処理が必要
     """
- 
-    BASE = r'summon falling_block ~ ~1 ~ {BlockState:{Name:activator_rail},Time:1,'
-    KILL = r'kill @e[type=command_block_minecart,distance=..3]'
 
-    # summonコマンドの生成
-    result = BASE + r'Passengers:[{id:"command_block_minecart",' * len(merges)
+    BASE = \
+        r'summon falling_block ~ ~1 ~ {Time:1,BlockState:{Name:redstone_block},Passengers:[' + \
+        r'{id:armor_stand,Health:0,Passengers:[' + \
+        r'{id:falling_block,Time:1,BlockState:{Name:activator_rail},Passengers:['
 
-    # killコマンドの追加
-    result += r'Passengers:[{id:"command_block_minecart",' + rf'Command:"{KILL}"}}],'
+    KILL = \
+        r'''{id:command_block_minecart,Command:'setblock ~ ~1 ~ command_block{auto:1,Command:"fill ~ ~ ~ ~ ~-2 ~ air"}'},''' + \
+        r'''{id:command_block_minecart,Command:'kill @e[type=command_block_minecart,distance=..1]'}]}]}]}'''
 
-    # mergeコマンドの追加
-    for m in merges:
-        mm = m.strip()
-        result +=  rf"Command:'{mm}'}}],"
-    result = result.rstrip(',')
-    result += '}'
-    result += '\n\n\n'
+    # コマンドの連結。コマンドブロックの文字数に気をつけないとだめ
+    CHAR_LIM = 32500 - len(BASE) - len(KILL)
+    results = [""]
+    now_char = 0
 
-    return result
+    for cmd in (rf"{{id:command_block_minecart,Command:'{c}'}}," for c in commands):
+        now_char += len(cmd)
+
+        if CHAR_LIM < now_char:
+            results.append("")
+            now_char = len(cmd)
+
+        results[-1] += cmd
+
+    results = [BASE + r + KILL for r in results]
+
+    return results
 
 
 

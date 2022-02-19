@@ -18,7 +18,7 @@ def json2summon(file_path):
 
 if __name__ == '__main__':
     # 入力ファイルがあるフォルダ フォルダ内のファイルをすべて処理する
-    IN_PATH = 'input/json'
+    IN_PATH = 'input'
     for f in glob.glob(IN_PATH + '/*.json'):
         print(f)
         print(json2summon(f))
