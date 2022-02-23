@@ -4,15 +4,17 @@
 
 import re
 
-def add_backslash(s):
+def add_backslash(s, now):
     """バックスラッシュを追加する
     シングルクォーテーションでコマンドを囲むので、\nとか\'の数を調整する必要がある。
     """
 
     # '単一の場合\を追加する
     s = re.sub(r"(?<=[^\\])'", r"\\'", s)
-    bs_count = 1        # コマンド中にある連続バックスラッシュ
+    bs_count = now        # コマンド中にある連続バックスラッシュ
     bs_add = [1, 3]     # 元の数に対して増やすバックスラッシュ数
+    if now == 0:
+        bs_add = [0] + bs_add
 
     # 最大bs連続数をカウント
     while '\\' * bs_count in s:
@@ -23,10 +25,11 @@ def add_backslash(s):
     for i in range(bs_count-1, 0, -1):
         s = re.sub(rf"(?<=[^\\])\\{{{i}}}(?=[^\\])", r'\\'*bs_add[i], s)
 
-    if '\"' not in s and '\'' not in s:
-        s = '\\\"' + s + '\\\"'
-    else:
-        s = '\\\'' + s + '\\\''
+    if now == 1:
+        if '\"' not in s and '\'' not in s:
+            s = '\\\"' + s + '\\\"'
+        else:
+            s = '\\\'' + s + '\\\''
 
     return s
 

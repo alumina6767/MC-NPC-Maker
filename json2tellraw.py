@@ -23,38 +23,38 @@ S_LIM = 25
 
 
 # この下は触らない
-def json2tellraw(file_path):
+def json2tellraw(json_data):
     global F_SELECTOR, T_SELECTOR, T_NAME, S_LIM
 
-    with open(file_path, mode='r', encoding="utf-8") as in_f:
-        d = json.load(in_f)
+    execute = ' '.join(['execute at', F_SELECTOR.replace("NAME", json_data["name"])])
 
-        execute = ' '.join(['execute at', F_SELECTOR.replace("NAME", d["name"])])
+    T_NAME = T_NAME.replace("NAME_COLOR", json_data["name_color"]).replace("NAME", json_data["name"])
+    name_template = ' '.join(['tellraw', T_SELECTOR, r'["",', T_NAME, ','])
 
-        T_NAME = T_NAME.replace("NAME_COLOR", d["name_color"]).replace("NAME", d["name"])
-        name_template = ' '.join(['tellraw', T_SELECTOR, r'["",', T_NAME, ','])
+    result = {} 
+    for scene in json_data["texts"].keys():
+        # シーン名
+        # result += f'## {scene}' + '\n'
+        value = []
+        for t in json_data["texts"][scene]:
+            cmd = ""
+            body = t.strip('「」')
+            if body != "":
+                tellraw = name_template + r'{"text":"body","color":"t_color"}]'.replace("body", body).replace("t_color", json_data["text_color"])
+                cmd = ' '.join([execute, 'run', tellraw])
+                value.append(cmd)
 
-        result = ''
-        
-        for scene in d["texts"].keys():
-            # シーン名
-            result += f'## {scene}' + '\n'
-            for t in d["texts"][scene]:
-                body = t.strip('「」')
-                if body != "":
-                    tellraw = name_template + r'{"text":"body","color":"t_color"}]'.replace("body", body).replace("t_color", d["text_color"])
-                    result += ' '.join([execute, 'run', tellraw]) + '\n'
+                # 一列が長いときは間隔を設ける
+                if S_LIM < len(body):
+                    value.append('help')
 
-                    # 一列が長いときは間隔を設ける
-                    if S_LIM < len(body):
-                        result += ' \n'
-
-        # out_f.write(result)
-        return result
+        result[scene] = value
+    # out_f.write(result)
+    return result
 
 if __name__ == "__main__":
     # 入力ファイルがあるフォルダ フォルダ内のファイルをすべて処理する
-    IN_PATH = 'input/'
+    IN_PATH = 'input2/'
 
     for f in glob.glob(IN_PATH + '/*.json'):
         print(f)

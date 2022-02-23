@@ -17,7 +17,7 @@ def json2book(in_file_name):
         d = json.load(f)
 
         result = ''
-        results = ''
+        results = {}
         
         for scene in d["texts"].keys():
             # 本の初期化
@@ -25,7 +25,7 @@ def json2book(in_file_name):
             page = ''
             pages = []
 
-            results += rf'## {scene}' + '\n'
+            # results += rf'## {scene}' + '\n'
             for t in d["texts"][scene]:
 
                 body = t.strip(' 「」 ')
@@ -48,7 +48,6 @@ def json2book(in_file_name):
                 if len(body) % WITH == 1:
                     # 句読点だけの行をなくす
                     page.rstrip('。、.,')
-                    print(body)
 
                 page += r'\\n\\n'
                 row += c_row + 1
@@ -61,8 +60,8 @@ def json2book(in_file_name):
             result = r"pages:['"
             result += r"','".join([rf'{{"text":"{p}"}}' for p in pages])
             result += r"']," + rf'title:"{scene}",author:"{d["author"]}"'
-            result = rf'execute at @e[type=villager,name="[{d["name"]}]",distance=0..,limit=1] run summon item ^ ^1.5 ^1 {{NoGravity:1b,Glowing:1b,PickupDelay:60,Motion:[0.0,-0.05,0.0],Item:{{id:"minecraft:written_book",tag:{{{result}}},Count:{BOOK_COUNT}b}}}}'
-            results += result + '\n'
+            result = rf'execute at @e[type=villager,name="[{d["name"]}]",distance=0..,limit=1] run summon item ^ ^1.5 ^1 {{NoGravity:1b,Glowing:1b,PickupDelay:60,Motion:[0.0,-0.05,0.0],Item:{{id:"written_book",tag:{{{result}}},Count:{BOOK_COUNT}b}}}}'
+            results[scene] = result
 
         return results
         
