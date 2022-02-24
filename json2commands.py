@@ -12,7 +12,7 @@ from json2summon import json2summon
 from json2tellraw import json2tellraw
 
 # 入力ファイルがあるフォルダ フォルダ内のファイルをすべて処理する
-IN_PATH = 'input2'
+IN_PATH = 'input'
 
 def get_initial(ifs,json_data):
     '''
@@ -73,7 +73,7 @@ if __name__ == '__main__':
             s += f'# !ID={json_data["ID"]}\n'
 
             for scene in json_data['texts']:
-                s += '# !' + scene + '\n'
+                s += '# !scene=' + scene + '\n'
                 s += '\n'.join(tellraw[scene]) + '\n'
                 s += book[scene] + '\n'
                 s += button + '\n'
