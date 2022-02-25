@@ -2,7 +2,6 @@
     "name_color": "#ede353",
     "text_color": "#faf8de",
     "name": "ムキムキのお兄さん",
-    "author": "logbook",
     "texts": {
         "シーン１": [
             "おお",
@@ -23,7 +22,7 @@
             "暇なら、石のボタンを持ってきてくれないか？"
         ]
     },
-    "ifs": "input2/example.mcfunction",
+    "ifs": "input/example.mcfunction",
     "ID": "test_npc",
     "profession": "weaponsmith",
     "biome": "taiga"

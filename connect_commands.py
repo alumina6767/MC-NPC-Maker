@@ -48,8 +48,8 @@ def connect_commands(commands):
         r'''{id:command_block_minecart,Command:'setblock ~ ~1 ~ command_block{auto:1,Command:"fill ~ ~ ~ ~ ~-2 ~ air"}'},''' + \
         r'''{id:command_block_minecart,Command:'kill @e[type=command_block_minecart,distance=..1]'}]}]}]}'''
 
-    # コマンドの連結。コマンドブロックの文字数に気をつけないとだめ
-    CHAR_LIM = 32500 - len(BASE) - len(KILL) - 5000
+    # コマンドの連結。コマンドブロックの文字数に気をつけないとだめ 大きすぎるとサーバーに蹴られる
+    CHAR_LIM = 32500 - len(BASE) - len(KILL) - 1000
     results = [""]
     now_char = 0
 

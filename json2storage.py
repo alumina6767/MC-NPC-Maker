@@ -1,7 +1,5 @@
 
-import json
 from connect_commands import add_backslash
-from json2button import json2button
 
 
 def tellraw2storage(tellraw, ID):
@@ -30,11 +28,6 @@ def tellraw2storage(tellraw, ID):
                 continue
 
             cmds.append('\'' + add_backslash(cmd, 0) +'\'' )
-            # cmds.append(json.dumps(cmd, ensure_ascii=False))
-
-        # ボタンの配置コマンド
-        # btn_cmd = json2button(json_data)
-        # cmds.append('\'' + btn_cmd + '\'')
 
         all_results[scene] = f"data modify storage event:{ID} scene{n+1} set value [{','.join(cmds[-1::-1])}]"
     return all_results

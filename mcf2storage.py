@@ -2,18 +2,13 @@
  mcfunction のコマンド群をストーレージに保存する
 '''
 
-from doctest import IGNORE_EXCEPTION_DETAIL
 import glob
-import json
+import os
 from connect_commands import add_backslash, connect_commands
-from json2book import json2book
-from json2button import json2button
-from json2storage import json2storage, tellraw2storage
-from json2summon import json2summon
-from json2tellraw import json2tellraw
+from json2storage import tellraw2storage
 
 # 入力ファイルがあるフォルダ フォルダ内のファイルをすべて処理する
-IN_PATH = 'command'
+IN_PATH = '分岐ありの整形済みmcf'
 
 
 def get_initial(ifs, ID):
@@ -24,20 +19,99 @@ def get_initial(ifs, ID):
     value = [
         f'{{\"if\":\'{ifs[key]}\',\"then\":\'{load_cmd.format(n+1)}\'}}' for n, key in enumerate(ifs)]
     result = f"data modify storage event:{ID} tmp set value [{','.join(value[::-1])}]"
-    return result
+    return result.replace('\'', '\\\\\'')
+
+
+def mcf2set(cmds, ifs):
+    initial = get_initial(ifs, cmds['ID'])
+    dx = 0
+    dy = 2
+    dz = 0
+    ID = cmds['ID']
+
+    set1 = [
+        f'setblock ~{dx+1} ~{dy} ~{dz} red_stained_glass',
+        f'setblock ~{dx} ~{dy} ~{dz} command_block[facing=up]{{Command:\"setblock ~1 ~ ~ red_stained_glass\",TrackOutput:0b}}',
+        f'setblock ~{dx} ~{dy+1} ~{dz} chain_command_block[facing=up]{{Command:\'{initial}\',auto:1b,TrackOutput:0b}}',
+        f'setblock ~{dx} ~{dy+2} ~{dz} chain_command_block[facing=east]{{Command:\"setblock ~2 ~-2 ~ redstone_block\",auto:1b,TrackOutput:0b}}',
+        f'setblock ~{dx+1} ~{dy+2} ~{dz} chain_command_block[facing=east]{{Command:\"fill ~1 ~-1 ~ ~1 ~2 ~ air\",auto:1b,TrackOutput:0b}}'
+    ]
+
+    set2 = [
+        f'setblock ~{dx+2} ~{dy} ~{dz} red_stained_glass',
+        f'setblock ~{dx+3} ~{dy} ~{dz} command_block[facing=east]{{Command:\"setblock ~-1 ~ ~ air\",TrackOutput:0b}}',
+        f'setblock ~{dx+4} ~{dy} ~{dz} chain_command_block[facing=east]{{Command:\"data modify block ~3 ~ ~ Command set from storage event:{ID} tmp[-1].if\",auto:1b,TrackOutput:0b}}',
+        f'setblock ~{dx+5} ~{dy} ~{dz} chain_command_block[facing=east]{{Command:\"data modify block ~4 ~1 ~ Command set from storage event:{ID} tmp[-1].then\",auto:1b,TrackOutput:0b}}',
+        f'setblock ~{dx+6} ~{dy} ~{dz} chain_command_block[facing=east]{{Command:\"data remove storage event:{ID} tmp[-1]\",auto:1b,TrackOutput:0b}}',
+        f'setblock ~{dx+7} ~{dy} ~{dz} chain_command_block[facing=east]{{auto:1b,TrackOutput:0b}}',
+        f'setblock ~{dx+8} ~{dy} ~{dz} chain_command_block[conditional=true,facing=east]{{Command:\"setblock ~1 ~ ~ chain_command_block[facing=up]\",auto:1b,TrackOutput:0b}}',
+        f'setblock ~{dx+9} ~{dy} ~{dz} chain_command_block[facing=east]{{Command:\"setblock ~ ~ ~ chain_command_block[facing=east]\",auto:1b,TrackOutput:0b}}',
+        f'setblock ~{dx+10} ~{dy} ~{dz} chain_command_block[facing=east]{{Command:\"setblock ~-8 ~ ~ redstone_block\",auto:1b,TrackOutput:0b}}',
+        f'setblock ~{dx+11} ~{dy} ~{dz} chain_command_block[facing=east]{{Command:\"say noo\",auto:1b,TrackOutput:0b}}',
+        f'setblock ~{dx+9} ~{dy+1} ~{dz} chain_command_block[facing=west]{{auto:1b,TrackOutput:0b}}',
+        f'setblock ~{dx+8} ~{dy+1} ~{dz} chain_command_block[facing=west]{{Command:\"setblock ~-6 ~ ~ redstone_block\",auto:1b,TrackOutput:0b}}',
+        f'setblock ~{dx+7} ~{dy+1} ~{dz} chain_command_block[facing=west]{{Command:\"setblock ~-5 ~-1 ~ red_stained_glass\",auto:1b,TrackOutput:0b}}'
+    ]
+
+    set3 = [
+        f'setblock ~{dx+3} ~{dy+1} ~{dz} comparator[facing=west]',
+        f'setblock ~{dx+4} ~{dy+1} ~{dz} iron_block',
+        f'setblock ~{dx+5} ~{dy+1} ~{dz} iron_block',
+        f'setblock ~{dx+4} ~{dy+2} ~{dz} redstone_wire[east=side,west=side]',
+        f'setblock ~{dx+5} ~{dy+2} ~{dz} redstone_wire[east=side,west=side]',
+        f'setblock ~{dx+6} ~{dy+1} ~{dz} command_block[facing=up]{{Command:\"fill ~-4 ~2 ~ ~-4 ~ ~ air\",TrackOutput:0b}}',
+        f'setblock ~{dx+6} ~{dy+2} ~{dz} chain_command_block[facing=east]{{Command:\"data modify block ~4 ~-1 ~ Command set from storage event:{ID} tmp[-1]\",auto:1b,TrackOutput:0b}}',
+        f'setblock ~{dx+7} ~{dy+2} ~{dz} chain_command_block[facing=east]{{Command:\"data remove storage event:{ID} tmp[-1]\",auto:1b,TrackOutput:0b}}',
+        f'setblock ~{dx+8} ~{dy+2} ~{dz} chain_command_block[conditional=true,facing=east]{{Command:\"setblock ~2 ~ ~ redstone_block\",auto:1b,TrackOutput:0b}}',
+    ]
+
+    set4 = [
+        f'setblock ~{dx+10} ~{dy+2} ~{dz} red_stained_glass',
+        f'setblock ~{dx+10} ~{dy+1} ~{dz} command_block[facing=east]{{TrackOutput:0b}}',
+        f'setblock ~{dx+11} ~{dy+1} ~{dz} chain_command_block[facing=east]{{Command:\"setblock ~-1 ~1 ~ red_stained_glass\",auto:1b,TrackOutput:0b}}',
+        f'setblock ~{dx+11} ~{dy+2} ~{dz} structure_block[mode=load]{{integrity:1.0f,mode:"LOAD",name:"event:timer",posX:-9,posY:-1,posZ:0,showboundingbox:0b,sizeX:2,sizeY:3,sizeZ:1}}'
+    ]
+
+    return set1 + set2 + set3 + set4
+
+
+def get_ifs(file):
+    is_if = False
+    ifs = {}
+    for l in file:
+        if l[:7] == '## !if=':
+            # 区切りのコメント
+            scene = l[7:].strip()
+            is_if = True
+
+        elif l != '' and is_if:
+            # コマンドを追加
+            ifs[scene] = l
+            is_if = False
+
+    return ifs
 
 
 def mcf2storage(file):
     '''
     mcfunction から storage用のコマンドを作る
-    # !ID=hogehoge
-    # !シーン１
-    1行目はif につかうコマンド
-    2行目以降は実際に実行するコマンド
-    空行は遅延
+    #region [meta]
+    ## !ID=hogehoge
+    #endregion
 
-    # !シーン２
+    #region [if]
+    ## !if=シーン１
+    条件用コマンド
+    ## !if=シーン２
+    #endregion
+
+    #region [scene]
+    ## !scene=シーン１
+    実際に実行するコマンド
+    空行は遅延
+    ## !scene=シーン２
     の繰り返しから読みこむ
+    #endregion
     '''
 
     d = {}
@@ -45,17 +119,16 @@ def mcf2storage(file):
     scene = ""
     blank = 0
 
-    for l in map(lambda l: l.strip(), file):
-
-        if l[0:6] == '# !ID=':
+    for l in file:
+        if l[0:7] == '## !ID=':
             # IDの保存
-            ID = l[6:].strip()
+            ID = l[7:].strip()
             d['ID'] = ID
             blank = 0
 
-        elif l[0:3] == '# !':
+        elif l[0:10] == '## !scene=':
             # 区切りのコメント
-            scene = l[3:].strip()
+            scene = l[10:].strip()
             blank = 0
 
         elif l == '':
@@ -77,46 +150,37 @@ if __name__ == '__main__':
         with open(path, mode='r', encoding="utf-8") as in_f:
             print(f'{path}を読みこみました')
 
-            # json_data = json.load(in_f)
             file_name = path.split('\\')[-1]
-            # print(file_name)
 
-            # summon = json2summon(path)
-            # print(summon)
-
-            # tellraw = json2tellraw(json_data)
-            # print(tellraw)
-
-            # book = json2book(path)
-            # print(book)
-
-            # button = json2button(json_data)
-            # print(button)
-
-            cmds = mcf2storage(in_f)
+            lines = [l.strip() for l in in_f]
+            cmds = mcf2storage(lines)
+            ifs = get_ifs(lines)
 
             if 'ID' not in cmds:
                 print(f'[WARNING] IDのないファイルをスキップします: {path}')
                 continue
 
+            sets = mcf2set(cmds, ifs)
+
             # ID を消す
             ID = cmds.pop('ID')
-            print(cmds)
+
             # バックスラッシュを追加する
             for key in cmds:
                 cmds[key] = [add_backslash(c, 0) for c in cmds[key]]
-            ifs = {scene: cmds[scene][0] for scene in cmds}
-            initial = get_initial(ifs, ID)
-            storage_then = tellraw2storage(cmds, ID)
-            # print(storage_then)
 
-        out_file = './output3/' + file_name.split('.')[0] + '.mcfunction'
+            storage_then = tellraw2storage(cmds, ID)
+
+        # 出力ディレクトリの用意
+        out_dir = 'ストレージ利用のコマンド出力先'
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+            print(f'フォルダ {out_dir}を作成しました。')
+
+        out_file = f'{out_dir}/' + file_name.split('.')[0] + '.mcfunction'
         with open(out_file, mode="w", encoding="utf-8") as of:
-            # of.write('\n'.join(['# 召喚コマンド', summon, '# 台詞', tellraw, '# 本', book, '# storage', storage_then]))
             s = []
-            for key in storage_then:
-                s.append(storage_then[key])
-                # s.append(json.dumps(storage_then[key], ensure_ascii=False))
-            # of.write('\n'.join(connect_commands(s)))
+            s += connect_commands([storage_then[key].replace('\'', '\\\'')
+                                  for key in storage_then] + [add_backslash(set, 0) for set in sets])
             of.write('\n'.join(s))
-            # of.write('\n'.join(connect_commands([add_backslash(c, 0) for c in [cmds[key] for key in cmds]])) + '\n' + initial)
+            print(f'{out_file}に出力しました。')

@@ -7,34 +7,43 @@
 import pyperclip
 from connect_commands import add_backslash, connect_commands
 
+def mcf2list(file):
+    D = []
+    cmd = []
+    is_scene_region = False
+    for s in file:
+        if not is_scene_region :
+            if s[:15] == '#region [scene]':
+                is_scene_region = True
+
+        else:
+            if s[:10] == '#endregion':
+                break
+
+            elif s[:10] == '## !scene=':
+                D.append(cmd)
+                cmd = []
+
+            elif s[0] != '#':
+                cmd.append(s)
+    
+    D.append(cmd)
+    return D
+
 def mcf2cmd_block(file_paths):
     """
     .mcfunctionに書かれた複数行のコマンドをコマンドブロック群に変換する
     """
 
     set_cmds = []
-    all_results = []
     dz = 0
     for fp in file_paths:
         with open(fp, 'r', encoding='utf-8') as in_f:
             print(fp + 'を読み込みました。')
 
-            D = []
-
-            # 一度リストに変DD
-            cmd = []
-            scene = 0
-            for s in in_f:
-                if s[:9] == '# !scene=':
-                    # 一つ目のシーンまではスキップすDD
-                    if scene != 0:
-                        D.append(cmd)
-                        cmd = []
-                    scene += 1
-
-                elif s[0] != '#' and scene != 0:
-                    cmd.append(s)
-            D.append(cmd)
+            # 一度リストに変換
+            D = mcf2list(in_f)
+    
             # データについて処理
             for d in D:
                 x = dx = 0
@@ -115,5 +124,3 @@ if __name__ == '__main__':
             pyperclip.copy(result)
             print(f'クリップボードに{i+1}つ目のコマンドをコピーしました。')
             input()
-    # print('クリップボードに結果をコピーしました。')
-    # pyperclip.copy(result)
