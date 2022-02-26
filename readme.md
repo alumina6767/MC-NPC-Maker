@@ -8,10 +8,11 @@ NPCに話させるイメージ。
 Python3、pyperclipが必要。  
 
 機能は
+
 - プレーンテキスト > JSON
 - JSON > summon (NPCを作る)
 - JSON > tellraw (NPCが話す)
-- JSON > give (NPCの話のログブックをプレイヤーにゆっくり渡す。正確にはsummon)
+~~- JSON > give (NPCの話のログブックをプレイヤーにゆっくり渡す。正確にはsummon)~~
 
 例えばこのようなJSONを用意すると、  
 
@@ -78,6 +79,8 @@ execute at @e[type=villager, name="[ムキムキのお兄さん]", distance=0..,
 ```
 
 ## JSON > give (ログブックをゆっくり渡す。正確にはsummon)
+
+**非常に不安定なため非推奨。**
 
 ``` mcfunction
 # 本

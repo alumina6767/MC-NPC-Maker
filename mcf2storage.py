@@ -4,6 +4,7 @@
 
 import glob
 import os
+from output import output2clipboard, output2file
 from connect_commands import add_backslash, connect_commands
 from json2storage import tellraw2storage
 
@@ -22,11 +23,10 @@ def get_initial(ifs, ID):
     return result.replace('\'', '\\\\\'')
 
 
-def mcf2set(cmds, ifs):
+def mcf2set(cmds, ifs, dz):
     initial = get_initial(ifs, cmds['ID'])
     dx = 0
     dy = 2
-    dz = 0
     ID = cmds['ID']
 
     set1 = [
@@ -38,7 +38,7 @@ def mcf2set(cmds, ifs):
     ]
 
     set2 = [
-        f'setblock ~{dx+2} ~{dy} ~{dz} red_stained_glass',
+        f'setblock ~{dx+2} ~{dy} ~{dz} orange_stained_glass',
         f'setblock ~{dx+3} ~{dy} ~{dz} command_block[facing=east]{{Command:\"setblock ~-1 ~ ~ air\",TrackOutput:0b}}',
         f'setblock ~{dx+4} ~{dy} ~{dz} chain_command_block[facing=east]{{Command:\"data modify block ~3 ~ ~ Command set from storage event:{ID} tmp[-1].if\",auto:1b,TrackOutput:0b}}',
         f'setblock ~{dx+5} ~{dy} ~{dz} chain_command_block[facing=east]{{Command:\"data modify block ~4 ~1 ~ Command set from storage event:{ID} tmp[-1].then\",auto:1b,TrackOutput:0b}}',
@@ -50,7 +50,7 @@ def mcf2set(cmds, ifs):
         f'setblock ~{dx+11} ~{dy} ~{dz} chain_command_block[facing=east]{{Command:\"say noo\",auto:1b,TrackOutput:0b}}',
         f'setblock ~{dx+9} ~{dy+1} ~{dz} chain_command_block[facing=west]{{auto:1b,TrackOutput:0b}}',
         f'setblock ~{dx+8} ~{dy+1} ~{dz} chain_command_block[facing=west]{{Command:\"setblock ~-6 ~ ~ redstone_block\",auto:1b,TrackOutput:0b}}',
-        f'setblock ~{dx+7} ~{dy+1} ~{dz} chain_command_block[facing=west]{{Command:\"setblock ~-5 ~-1 ~ red_stained_glass\",auto:1b,TrackOutput:0b}}'
+        f'setblock ~{dx+7} ~{dy+1} ~{dz} chain_command_block[facing=west]{{Command:\"setblock ~-5 ~-1 ~ orange_stained_glass\",auto:1b,TrackOutput:0b}}'
     ]
 
     set3 = [
@@ -66,13 +66,16 @@ def mcf2set(cmds, ifs):
     ]
 
     set4 = [
-        f'setblock ~{dx+10} ~{dy+2} ~{dz} red_stained_glass',
+        f'setblock ~{dx+10} ~{dy+2} ~{dz} orange_stained_glass',
         f'setblock ~{dx+10} ~{dy+1} ~{dz} command_block[facing=east]{{TrackOutput:0b}}',
-        f'setblock ~{dx+11} ~{dy+1} ~{dz} chain_command_block[facing=east]{{Command:\"setblock ~-1 ~1 ~ red_stained_glass\",auto:1b,TrackOutput:0b}}',
+        f'setblock ~{dx+11} ~{dy+1} ~{dz} chain_command_block[facing=east]{{Command:\"setblock ~-1 ~1 ~ orange_stained_glass\",auto:1b,TrackOutput:0b}}',
         f'setblock ~{dx+11} ~{dy+2} ~{dz} structure_block[mode=load]{{integrity:1.0f,mode:"LOAD",name:"event:timer",posX:-9,posY:-1,posZ:0,showboundingbox:0b,sizeX:2,sizeY:3,sizeZ:1}}'
     ]
 
-    return set1 + set2 + set3 + set4
+    set5 = [
+        f'setblock ~{dx-1} ~{dy+1} ~{dz} dark_oak_wall_sign[facing=west]{{Text2:\'{{\"color\":\"#ffffff\",\"text\":\"{ID}\"}}\'}}'
+    ]
+    return set1 + set2 + set3 + set4 + set5
 
 
 def get_ifs(file):
@@ -146,6 +149,9 @@ def mcf2storage(file):
 
 
 if __name__ == '__main__':
+    dz = 0
+    storage_then = []
+    sets = []
     for path in glob.glob(IN_PATH + '/*.mcfunction'):
         with open(path, mode='r', encoding="utf-8") as in_f:
             print(f'{path}を読みこみました')
@@ -160,7 +166,8 @@ if __name__ == '__main__':
                 print(f'[WARNING] IDのないファイルをスキップします: {path}')
                 continue
 
-            sets = mcf2set(cmds, ifs)
+            sets += mcf2set(cmds, ifs, dz)
+            dz += 2
 
             # ID を消す
             ID = cmds.pop('ID')
@@ -168,19 +175,13 @@ if __name__ == '__main__':
             # バックスラッシュを追加する
             for key in cmds:
                 cmds[key] = [add_backslash(c, 0) for c in cmds[key]]
+            d = tellraw2storage(cmds, ID)
+            storage_then += [d[key] for key in d]
 
-            storage_then = tellraw2storage(cmds, ID)
-
-        # 出力ディレクトリの用意
-        out_dir = 'ストレージ利用のコマンド出力先'
-        if not os.path.exists(out_dir):
-            os.makedirs(out_dir)
-            print(f'フォルダ {out_dir}を作成しました。')
-
-        out_file = f'{out_dir}/' + file_name.split('.')[0] + '.mcfunction'
-        with open(out_file, mode="w", encoding="utf-8") as of:
-            s = []
-            s += connect_commands([storage_then[key].replace('\'', '\\\'')
-                                  for key in storage_then] + [add_backslash(set, 0) for set in sets])
-            of.write('\n'.join(s))
-            print(f'{out_file}に出力しました。')
+    # 出力ディレクトリの用意
+    out_dir = 'ストレージ利用のコマンド出力先'
+    out_file = f'{out_dir}/' + 'connected.mcfunction'
+    all_results = connect_commands([s.replace('\'', '\\\'')
+                                     for s in storage_then] + [add_backslash(set, 0) for set in sets])
+    output2file(out_dir, out_file, '\n\n'.join(all_results))
+    output2clipboard(all_results)

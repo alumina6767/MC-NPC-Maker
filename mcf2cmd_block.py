@@ -4,7 +4,7 @@
 
 """
 
-import pyperclip
+from output import output2clipboard, output2file
 from connect_commands import add_backslash, connect_commands
 
 def mcf2list(file):
@@ -111,16 +111,8 @@ if __name__ == '__main__':
     all_results = mcf2cmd_block(file_paths)
 
     # 出力ファイルへ保存
-    out_fp = 'output\\connected.mcfunction'
-    with open(out_fp, 'w', encoding='utf-8') as out_f:
-        out_f.write('\n\n'.join(all_results))
-        print(out_fp + 'へ出力を行いました。')
+    out_dir = 'output'
+    out_file = f'{out_dir}/' + 'connected.mcfunction'
 
-    print(f'結果は{len(all_results)}個のコマンドになりました。')
-    print('クリップボードに結果をコピーしますか？ [y or n]')
-    if input().strip() == 'y':
-        print('コマンド毎にクリップボードにコピーします。エンターを押すと次のコマンドをコピーします。')
-        for i, result in enumerate(all_results):
-            pyperclip.copy(result)
-            print(f'クリップボードに{i+1}つ目のコマンドをコピーしました。')
-            input()
+    output2file(out_dir, out_file, '\n\n'.join(all_results))
+    output2clipboard(all_results)
