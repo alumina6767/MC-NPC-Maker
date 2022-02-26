@@ -8,27 +8,36 @@ from output import output2clipboard, output2file
 from connect_commands import add_backslash, connect_commands
 
 def mcf2list(file):
-    D = []
+    D = {}
     cmd = []
     is_scene_region = False
+    ID = False
+    scene = False
+
     for s in file:
         if not is_scene_region :
             if s[:15] == '#region [scene]':
                 is_scene_region = True
+
+            elif s[0:7] == '## !ID=':
+                # IDの保存
+                ID = s[7:].strip()
 
         else:
             if s[:10] == '#endregion':
                 break
 
             elif s[:10] == '## !scene=':
-                D.append(cmd)
+                if scene:
+                    D[scene] = cmd
                 cmd = []
+                scene = s[10:].strip()
 
             elif s[0] != '#':
                 cmd.append(s)
     
-    D.append(cmd)
-    return D
+    D[scene] = cmd
+    return D, ID
 
 def mcf2cmd_block(file_paths):
     """
@@ -42,10 +51,10 @@ def mcf2cmd_block(file_paths):
             print(fp + 'を読み込みました。')
 
             # 一度リストに変換
-            D = mcf2list(in_f)
+            D, ID = mcf2list(in_f)
     
             # データについて処理
-            for d in D:
+            for scene in D:
                 x = dx = 0
                 end_x = 16
                 y = 2
@@ -53,22 +62,23 @@ def mcf2cmd_block(file_paths):
 
                 # 開始の機構
                 set_cmd = [
+                    f'setblock ~{dx-2} ~{y} ~{z} dark_oak_wall_sign[facing=west]{{Text2:\\\'{{\"color\":\"#ffffff\",\"text\":\"{ID}\"}}\\\',Text3:\\\'{{\"color\":\"#ffffff\",\"text\":\"{scene}\"}}\\\'}}',
                     f"setblock ~{x} ~{y+1} ~{z} comparator[facing=west]",
                     f'setblock ~{x+1} ~{y} ~{z} command_block{{Command:\"setblock ~-1 ~ ~1 red_stained_glass\",TrackOutput:0b}}',
                     f"setblock ~{x} ~{y} ~{z+1} red_stained_glass",
-                    f'setblock ~{x-1} ~{y} ~{z+1} structure_block[mode=load]{{integrity:1.0f,mode:"LOAD",name:"minecraft:timer",posX:0,posY:1,posZ:-1,showboundingbox:1b,sizeX:1,sizeY:3,sizeZ:1}}',
+                    f'setblock ~{x-1} ~{y} ~{z+1} structure_block[mode=load]{{integrity:1.0f,mode:"LOAD",name:"minecraft:timer",posX:0,posY:1,posZ:-1,sizeX:1,sizeY:3,sizeZ:1}}',
                     f'setblock ~{x+15} ~{y-1} ~{z} command_block{{Command:\"fill ~-16 ~2 ~ ~-16 ~4 ~ air\",TrackOutput:0b}}']
                 set_cmds += set_cmd
                 dx += 2
 
-                for s in d:
+                for s in D[scene]:
                     x = dx
                     set_cmd = []
 
                     if dx % 16 == 0:
                         # 赤石信号の限界で更新
                         set_cmd = [
-                            f'setblock ~{x} ~{y} ~{z} structure_block[mode=load]{{integrity:1.0f,mode:"LOAD",name:"minecraft:timer",posX:0,posY:1,posZ:0,showboundingbox:1b,sizeX:1,sizeY:3,sizeZ:1}}',
+                            f'setblock ~{x} ~{y} ~{z} structure_block[mode=load]{{integrity:1.0f,mode:"LOAD",name:"minecraft:timer",posX:0,posY:1,posZ:0,sizeX:1,sizeY:3,sizeZ:1}}',
                             f"setblock ~{x+1} ~{y+1} ~{z} comparator[facing=west]",
                             f'setblock ~{x+15} ~{y-1} ~{z} command_block{{Command:\"fill ~-15 ~2 ~ ~-15 ~4 ~ air\",TrackOutput:0b}}']
                         dx += 3
