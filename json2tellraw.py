@@ -28,8 +28,8 @@ def json2tellraw(json_data):
 
     execute = ' '.join(['execute at', F_SELECTOR.replace("NAME", json_data["name"])])
 
-    T_NAME = T_NAME.replace("NAME_COLOR", json_data["name_color"]).replace("NAME", json_data["name"])
-    name_template = ' '.join(['tellraw', T_SELECTOR, r'["",', T_NAME, ','])
+    t_name = T_NAME.replace("NAME_COLOR", json_data["name_color"]).replace("NAME", json_data["name"])
+    name_template = ' '.join(['tellraw', T_SELECTOR, r'["",', t_name, ','])
 
     result = {} 
     for scene in json_data["texts"].keys():
