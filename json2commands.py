@@ -1,5 +1,6 @@
 # JSONから色々なコマンドを作成する
 
+from asyncio.windows_events import NULL
 import glob
 import json
 import os
@@ -42,6 +43,7 @@ if __name__ == '__main__':
                 book = False
 
             # 条件分岐のファイル指定がある時
+            ifs = None
             if 'ifs' in json_data:
                 ifs = json2storage(json_data)
 
@@ -64,11 +66,11 @@ if __name__ == '__main__':
             s += '#region [if] 条件分岐ゾーン (上から順に条件コマンドの結果が真なら該当のシーンのみが再生されます helpコマンドは常に真を表します)\n'
             for scene in json_data['texts']:
                 s += '## !if=' + scene + '\n'
-                if scene in ifs:
+                if ifs and scene in ifs:
                     s += ifs[scene] + '\n'
                 else:
                     s += '#条件分岐用のコマンドが見つかりませんでした。\n'
-                    print(f'シーン{scene}の条件分岐用のコマンドが見つかりませんでいた。\n')
+                    print(f'シーン{scene}の条件分岐用のコマンドが見つかりませんでした。\n')
             s += '#endregion\n\n'
 
             s += '#region [scene] 会話シーンコマンドゾーン\n'
