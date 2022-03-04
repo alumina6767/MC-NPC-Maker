@@ -4,6 +4,7 @@
 
 import re
 
+
 def add_backslash(s, now):
     """バックスラッシュを追加する
     シングルクォーテーションでコマンドを囲むので、\nとか\'の数を調整する必要がある。
@@ -18,7 +19,7 @@ def add_backslash(s, now):
 
     # 最大bs連続数をカウント
     while '\\' * bs_count in s:
-        bs_add.append(bs_add[bs_count]*2+bs_count+1) 
+        bs_add.append(bs_add[bs_count]*2+bs_count+1)
         bs_count += 1
 
     # bsの追加 特定のbs連続文字を指定の連続数に置き換え
@@ -27,11 +28,12 @@ def add_backslash(s, now):
 
     if now == 1:
         if '\"' not in s and '\'' not in s:
-            s = '\\\"' + s + '\\\"'
+            s = '\\\'' + s + '\\\''
         else:
             s = '\\\'' + s + '\\\''
 
     return s
+
 
 def connect_commands(commands):
     """ 
@@ -65,6 +67,3 @@ def connect_commands(commands):
     results = [BASE + r + KILL for r in results]
 
     return results
-
-
-

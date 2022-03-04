@@ -1,6 +1,5 @@
 # JSONから色々なコマンドを作成する
 
-from asyncio.windows_events import NULL
 import glob
 import json
 import os

@@ -9,7 +9,7 @@ from connect_commands import add_backslash, connect_commands
 from json2storage import tellraw2storage
 
 # 入力ファイルがあるフォルダ フォルダ内のファイルをすべて処理する
-IN_PATH = '分岐ありの整形済みmcf'
+IN_PATH = '分岐なしの整形済みmcf'
 
 
 def get_initial(ifs, ID):

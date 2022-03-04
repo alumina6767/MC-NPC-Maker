@@ -7,21 +7,40 @@
 from output import output2clipboard, output2file
 from connect_commands import add_backslash, connect_commands
 
+
 def mcf2list(file):
     D = {}
     cmd = []
-    is_scene_region = False
-    ID = False
-    scene = False
+    ID = None
+    scene = None
+    ifs = {}
 
+    # IDの取得
     for s in file:
-        if not is_scene_region :
+        if s[0:7] == '## !ID=':
+            # IDの保存
+            ID = s[7:].strip()
+            break
+
+    # ifsの取得
+    for s in file:
+        if s[:12] == '#region [if]':
+            break
+
+    key = ''
+    for s in file:
+        if s[:10] == '#endregion':
+            break
+        elif s[:7] == '## !if=':
+            key = s[7:].strip()
+        elif s.strip() != '' and s[0] != '#':
+            ifs[key] = s.strip()
+
+    is_scene_region = False
+    for s in file:
+        if not is_scene_region:
             if s[:15] == '#region [scene]':
                 is_scene_region = True
-
-            elif s[0:7] == '## !ID=':
-                # IDの保存
-                ID = s[7:].strip()
 
         else:
             if s[:10] == '#endregion':
@@ -35,9 +54,10 @@ def mcf2list(file):
 
             elif s[0] != '#':
                 cmd.append(s)
-    
+
     D[scene] = cmd
-    return D, ID
+    return D, ID, ifs
+
 
 def mcf2cmd_block(file_paths):
     """
@@ -51,14 +71,23 @@ def mcf2cmd_block(file_paths):
             print(fp + 'を読み込みました。')
 
             # 一度リストに変換
-            D, ID = mcf2list(in_f)
-    
+            D, ID, ifs = mcf2list(in_f)
+
             # データについて処理
             for scene in D:
                 x = dx = 0
                 end_x = 16
                 y = 2
                 z = 2*dz
+
+                # 分岐の機構
+                if scene in ifs:
+                    cmd = add_backslash(ifs[scene], 1)
+                    condition_cmd = [
+                        f'setblock ~{x+1} ~{y+2} ~{z+1} command_block[facing=west]{{Command:{cmd},TrackOutput:0b}}',
+                        f'setblock ~{x} ~{y+2} ~{z+1} chain_command_block[conditional=true,facing=west]{{Command:\"setblock ~ ~-2 ~ redstone_block\",auto:1b,TrackOutput:0b}}'
+                    ]
+                    set_cmds += condition_cmd
 
                 # 開始の機構
                 set_cmd = [
@@ -106,10 +135,11 @@ def mcf2cmd_block(file_paths):
                 set_cmds += [
                     f"fill ~-1 ~2 ~{dz*2} ~{end_x} ~2 ~{dz*2+1} gray_terracotta replace air"]
                 # 赤石
-                set_cmds += [f"fill ~-1 ~3 ~{dz*2} ~{end_x} ~3 ~{dz*2} redstone_wire[east=side,power=0,west=side] replace air"]
-                
+                set_cmds += [
+                    f"fill ~-1 ~3 ~{dz*2} ~{end_x} ~3 ~{dz*2} redstone_wire[east=side,power=0,west=side] replace air"]
+
                 dz += 1
-            
+
     return connect_commands(set_cmds)
 
 
