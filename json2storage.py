@@ -1,5 +1,6 @@
 
 from connect_commands import add_backslash
+from messsage import print_error
 
 
 def tellraw2storage(tellraw, ID):
@@ -33,17 +34,22 @@ def tellraw2storage(tellraw, ID):
     return all_results
 
 
-def json2storage(json_data):
+def get_ifs(json_data):
     ifs_f = json_data['ifs']
     d = {}
 
-    with open(ifs_f, mode='r', encoding="utf-8") as ifs:
-        for l in ifs:
-            l = l.strip()
-            if l == "":
-                continue
-            elif l[0:3] == '# !':
-                scene = l[3:]
-            else :
-                d[scene] = l
+    try:
+        with open(ifs_f, mode='r', encoding="utf-8") as ifs:
+            for l in ifs:
+                l = l.strip()
+                if l == "":
+                    continue
+                elif l[0:3] == '# !':
+                    scene = l[3:]
+                else :
+                    d[scene] = l
+
+    except FileNotFoundError as e:
+        print_error(f'ifsのファイルが見つかりません。: {e}')
+        exit()
     return d

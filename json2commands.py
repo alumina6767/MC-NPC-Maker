@@ -6,9 +6,10 @@ import json
 import os
 from json2book import json2book
 from json2button import json2button
-from json2storage import json2storage
+from json2storage import get_ifs
 from json2summon import json2summon
 from json2tellraw import json2tellraw
+from messsage import print_error, print_warn
 
 # 入力ファイルがあるフォルダ フォルダ内のファイルをすべて処理する
 IN_PATH = 'input'
@@ -24,15 +25,37 @@ def get_initial(ifs, json_data):
     result = f"data modify storage event:{json_data['ID']} tmp set value [{','.join(value[::-1])}]"
     return result
 
+def check_json(json_data):
+    keys = ('name', 'name_color', 'text_color', 'texts', 'ID', 'profession', 'biome')
+    flag = True
+    for k in keys:
+        if k not in json_data:
+            print_error(f'{k}の指定が存在しません。')
+            flag = False
+
+    return flag
 
 if __name__ == '__main__':
     for path in glob.glob(IN_PATH + '/*.json'):
         with open(path, mode='r', encoding="utf-8") as in_f:
             print(path + 'を読み込みました。')
-            json_data = json.load(in_f)
+
+            # JSONとして読み込み
+            try:
+                json_data = json.load(in_f)
+            except json.JSONDecodeError as e:
+                print(e)
+                print_error('JSONの記述に誤りがあります。')
+                exit()
+
             file_name = path.split('\\')[-1]
 
-            summon = json2summon(path)
+            # 要素が足りているかチェック
+            if not check_json(json_data):
+                exit()
+
+            # コマンドに変換
+            summon = json2summon(json_data)
             tellraw = json2tellraw(json_data)
             button = json2button(json_data)
 
@@ -40,12 +63,13 @@ if __name__ == '__main__':
             if 'author' in json_data:
                 book = json2book(path)
             else:
-                book = False
+                book = None
 
             # 条件分岐のファイル指定がある時
-            ifs = None
             if 'ifs' in json_data:
-                ifs = json2storage(json_data)
+                ifs = get_ifs(json_data)
+            else :
+                ifs = None
 
         # 出力ディレクトリの用意
         out_dir = 'command'
@@ -70,7 +94,7 @@ if __name__ == '__main__':
                     s += ifs[scene] + '\n'
                 else:
                     s += '#条件分岐用のコマンドが見つかりませんでした。\n'
-                    print(f'シーン{scene}の条件分岐用のコマンドが見つかりませんでした。\n')
+                    print_warn(f'scene{scene}の条件分岐用のコマンドが見つかりませんでした。\n')
             s += '#endregion\n\n'
 
             s += '#region [scene] 会話シーンコマンドゾーン\n'
