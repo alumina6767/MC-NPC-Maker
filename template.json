@@ -1,8 +1,12 @@
 {
+    "ID": "",
+    "name": "",
     "name_color": "",
     "text_color": "",
-    "name": "",
-    "author":"",
+    "profession": "",
+    "biome": "",
+    "ifs": "",
+    "author": "",
     "texts": {
         "scene1": [
             "",
@@ -14,7 +18,5 @@
             "",
             ""
         ]
-    },
-    "profession": "",
-    "biome": ""
+    }
 }

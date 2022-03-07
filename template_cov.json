@@ -1,0 +1,50 @@
+{
+    "ID": "",
+    "speakers": {
+        "speakerA": {
+            "name": "",
+            "name_color": "",
+            "text_color": "",
+            "profession": "",
+            "biome": ""
+        },
+        "speakerB": {
+            "name": "",
+            "name_color": "",
+            "text_color": "",
+            "profession": "",
+            "biome": ""
+        }
+    },
+    "ifs": "",
+    "texts": {
+        "scene1": {
+            "speakerA1": [
+                "",
+                ""
+            ],
+            "speakerB1": [
+                "",
+                ""
+            ],
+            "speakerA2": [
+                "",
+                ""
+            ]
+        },
+        "scene2": {
+            "speakerA1": [
+                "",
+                ""
+            ],
+            "speakerB1": [
+                "",
+                ""
+            ],
+            "speakerA2": [
+                "",
+                ""
+            ]
+        }
+    }
+}
