@@ -104,6 +104,9 @@ def mcf2cmd_block(file_paths):
                     x = dx
                     set_cmd = []
 
+                    if s[0] == '#':
+                        continue
+
                     if dx % 16 == 0:
                         # 赤石信号の限界で更新
                         set_cmd = [
@@ -114,19 +117,16 @@ def mcf2cmd_block(file_paths):
                         x += 3
                         end_x += 17
 
-                    if s.strip() == '':
-                        # 空行のときはコマブロ無し
-                        dx += 1
-                        continue
-
-                    else:
+                    if s.strip() != '':
+                        # 空行、コメントのときはコマブロ無し
                         s = s.strip()
                         # \の数を調整する めちゃややこい
                         cmd = add_backslash(s, 1)
                         set_cmd += [
                             f"setblock ~{x} ~{y} ~{z} command_block[facing=up]{{Command:{cmd},TrackOutput:0b}}"]
 
-                    set_cmds += set_cmd
+                    if set_cmd != []:
+                        set_cmds += set_cmd
                     dx += 1
 
                 # リピーター
