@@ -100,7 +100,7 @@ def json2conversation(d):
         ifs = get_ifs(d)
     else:
         ifs = {}
-        
+
     ifs_region = gen_ifs_region(d['texts'].keys(), ifs)
 
     # tellrawの生成
@@ -109,7 +109,10 @@ def json2conversation(d):
         # シーン名の挿入
         tellraws += '## !scene=' + scene + '\n'
         for speaker in d['texts'][scene].keys():
-            name = str(speaker).strip('0123456789')
+            name = str(speaker).strip('0123456789０１２３４５６７８９')
+            if name not in d['speakers']:
+                print_error(f'{name}の定義がspeakersに有りません。')
+                exit()
             name_c = d['speakers'][name]['name_color']
             text_c = d['speakers'][name]['text_color']
 

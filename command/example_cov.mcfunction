@@ -16,15 +16,15 @@ summon villager ~ ~ ~ {Invulnerable: 1b, NoAI: 1b, CustomName: '[{"text":"[","co
 #endregion
 
 #region [if] 条件分岐ゾーン (上から順に条件コマンドの結果が真なら該当のシーンのみが再生されます helpコマンドは常に真を表します)
-## !if=シーン1
-#条件分岐用のコマンドが見つかりませんでした。
-## !if=シーン2
-#条件分岐用のコマンドが見つかりませんでした。
+## !if=シーン１
+execute at @e[type=villager, name="[領主]", distance=0.., limit=1] run clear @p stone_sword 0
+## !if=シーン２
+help
 #endregion
 
 
 #region [scene] 会話シーンコマンドゾーン
-## !scene=シーン1
+## !scene=シーン１
 execute at @e[type=villager, name="[運営]", distance=0.., limit=1] run tellraw @a[distance=..10] ["", {"text":"<","color":"#2348eb"}, {"text":" 運営 "}, {"text":">  ","color":"#2348eb"} ,{"text":"皆様、エッグハントお疲れ様でした！","color":"#d5d5f0"}]
 execute at @e[type=villager, name="[運営]", distance=0.., limit=1] run tellraw @a[distance=..10] ["", {"text":"<","color":"#2348eb"}, {"text":" 運営 "}, {"text":">  ","color":"#2348eb"} ,{"text":"集めたたまごを、チームバナーのチェストに納品してくださいませ！","color":"#d5d5f0"}]
 
@@ -147,7 +147,7 @@ execute at @e[type=villager, name="[領主]", distance=0.., limit=1] run tellraw
 execute at @e[type=villager, name="[領主]", distance=0.., limit=1] run tellraw @a[distance=..10] ["", {"text":"<","color":"#c71585"}, {"text":" 領主 "}, {"text":">  ","color":"#c71585"} ,{"text":"こんなたまご、見たことがない……一体これは……？","color":"#d49fc0"}]
 execute at @e[type=villager, name="[システム]", distance=0.., limit=1] run tellraw @a[distance=..10] ["", {"text":"<","color":"#FFFFFF"}, {"text":" システム "}, {"text":">  ","color":"#FFFFFF"} ,{"text":"運営はイベントワールドに残っているプレイヤーをkickしてください","color":"#FFFFFF"}]
 
-## !scene=シーン2
+## !scene=シーン２
 execute at @e[type=villager, name="[領主]", distance=0.., limit=1] run tellraw @a[distance=..10] ["", {"text":"<","color":"#c71585"}, {"text":" 領主 "}, {"text":">  ","color":"#c71585"} ,{"text":"まだ飯食ってるからまってくれない？","color":"#d49fc0"}]
 execute at @e[type=villager, name="[？？？]", distance=0.., limit=1] run tellraw @a[distance=..10] ["", {"text":"<","color":"#574f42"}, {"text":" ？？？ "}, {"text":">  ","color":"#574f42"} ,{"text":"...","color":"#d91b02"}]
 #endregion
