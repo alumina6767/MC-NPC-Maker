@@ -46,7 +46,7 @@ def json2tellraw(json_data):
 
                 # 一列が長いときは間隔を設ける
                 if S_LIM < len(body):
-                    value.append('help')
+                    value.append('')
 
         result[scene] = value
     # out_f.write(result)
