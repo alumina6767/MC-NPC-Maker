@@ -27,7 +27,7 @@ def json2summon(json_data):
     if biome not in BIOME:
         print_warn(f'biome指定{biome}というバイオームは存在しません。')
 
-    com = rf"summon villager ~ ~ ~ {{Invulnerable: 1b, NoAI: 1b, CustomName: '[{{\"text\":\"[\",\"color\":\"{name_c}\"}},{{\"text\":\"{name}\",\"color\":\"white\"}},{{\"text\":\"]\",\"color\":\"{name_c}\"}}]', VillagerData: {{profession: \"minecraft:{profession}\", type: \"minecraft:{biome}\"}}, Offers: {{}}}}".replace(
+    com = rf"summon villager ~ ~ ~ {{Silent:1b,Invulnerable:1b,NoAI:1b,CustomName:'[{{\"text\":\"[\",\"color\":\"{name_c}\"}},{{\"text\":\"{name}\",\"color\":\"white\"}},{{\"text\":\"]\",\"color\":\"{name_c}\"}}]', VillagerData:{{profession:\"minecraft:{profession}\",type:\"minecraft:{biome}\"}},Offers:{{}}}}".replace(
         r'\"', r'"')
 
     return com + '\n'
